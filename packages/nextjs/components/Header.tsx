@@ -1,115 +1,71 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { hardhat } from "viem/chains";
-import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
-import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
-import { useOutsideClick, useTargetNetwork } from "~~/hooks/scaffold-eth";
 
-type HeaderMenuLink = {
-  label: string;
-  href: string;
-  icon?: React.ReactNode;
-};
+const KangarooLogo = () => (
+  <svg
+    width="40"
+    height="40"
+    viewBox="0 0 100 100"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="text-primary"
+  >
+    {/* Simple, fun kangaroo sketch */}
+    <path
+      d="M50 90C30 90 20 70 20 50C20 30 30 10 50 10C70 10 80 30 80 50C80 70 70 90 50 90Z"
+      stroke="currentColor"
+      strokeWidth="4"
+      fill="none"
+    />
+    {/* Ears */}
+    <path d="M35 25L30 15M65 25L70 15" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+    {/* Eyes */}
+    <circle cx="40" cy="40" r="3" fill="currentColor" />
+    <circle cx="60" cy="40" r="3" fill="currentColor" />
+    {/* Nose */}
+    <path d="M50 45L45 50L50 55L55 50L50 45Z" fill="currentColor" />
+    {/* Pouch */}
+    <path d="M40 60C40 60 50 70 60 60" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+  </svg>
+);
 
-export const menuLinks: HeaderMenuLink[] = [
-  {
-    label: "Home",
-    href: "/",
-  },
-
-  {
-    label: "Debug Contracts",
-    href: "/debug",
-    icon: <BugAntIcon className="h-4 w-4" />,
-  },
-];
-
-export const HeaderMenuLinks = () => {
+export const Header = () => {
   const pathname = usePathname();
 
-  return (
-    <>
-      {menuLinks.map(({ label, href, icon }) => {
-        const isActive = pathname === href;
-        return (
-          <li key={href}>
-            <Link
-              href={href}
-              passHref
-              className={`${
-                isActive ? "bg-secondary shadow-md" : ""
-              } hover:bg-secondary hover:shadow-md focus:!bg-secondary active:!text-neutral py-1.5 px-3 text-sm rounded-full gap-2 grid grid-flow-col`}
-            >
-              {icon}
-              <span>{label}</span>
-            </Link>
-          </li>
-        );
-      })}
-    </>
-  );
-};
-
-/**
- * Site header
- */
-export const Header = () => {
-  const { targetNetwork } = useTargetNetwork();
-  const isLocalNetwork = targetNetwork.id === hardhat.id;
-
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const burgerMenuRef = useRef<HTMLDivElement>(null);
-  useOutsideClick(
-    burgerMenuRef,
-    useCallback(() => setIsDrawerOpen(false), []),
-  );
+  const isActive = (path: string) => {
+    return pathname === path;
+  };
 
   return (
-    <div className="sticky lg:static top-0 navbar bg-base-100 min-h-0 flex-shrink-0 justify-between z-20 shadow-md shadow-secondary px-0 sm:px-2">
-      <div className="navbar-start w-auto lg:w-1/2">
-        <div className="lg:hidden dropdown" ref={burgerMenuRef}>
-          <label
-            tabIndex={0}
-            className={`ml-1 btn btn-ghost ${isDrawerOpen ? "hover:bg-secondary" : "hover:bg-transparent"}`}
-            onClick={() => {
-              setIsDrawerOpen(prevIsOpenState => !prevIsOpenState);
-            }}
-          >
-            <Bars3Icon className="h-1/2" />
-          </label>
-          {isDrawerOpen && (
-            <ul
-              tabIndex={0}
-              className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
-              onClick={() => {
-                setIsDrawerOpen(false);
-              }}
-            >
-              <HeaderMenuLinks />
-            </ul>
-          )}
-        </div>
-        <Link href="/" passHref className="hidden lg:flex items-center gap-2 ml-4 mr-6 shrink-0">
-          <div className="flex relative w-10 h-10">
-            <Image alt="SE2 logo" className="cursor-pointer" fill src="/logo.svg" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-bold leading-tight">Scaffold-ETH</span>
-            <span className="text-xs">Ethereum dev stack</span>
-          </div>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center">
+        <Link href="/" className="flex items-center space-x-2">
+          <KangarooLogo />
+          <span className="font-bold">JQ Kangaroo</span>
         </Link>
-        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">
-          <HeaderMenuLinks />
-        </ul>
+        <nav className="flex flex-1 items-center justify-end space-x-6 text-sm font-medium">
+          <Link
+            href="/"
+            className={`transition-colors hover:text-primary ${isActive("/") ? "text-primary" : "text-muted-foreground"}`}
+          >
+            Home
+          </Link>
+          <Link
+            href="/chat"
+            className={`transition-colors hover:text-primary ${isActive("/chat") ? "text-primary" : "text-muted-foreground"}`}
+          >
+            Chat
+          </Link>
+          <Link
+            href="/about"
+            className={`transition-colors hover:text-primary ${isActive("/about") ? "text-primary" : "text-muted-foreground"}`}
+          >
+            About
+          </Link>
+        </nav>
       </div>
-      <div className="navbar-end flex-grow mr-4">
-        <RainbowKitCustomConnectButton />
-        {isLocalNetwork && <FaucetButton />}
-      </div>
-    </div>
+    </header>
   );
 };

@@ -5,18 +5,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~~/co
 import { Input } from "~~/components/ui/input";
 import { isAuthenticated } from "~~/utils/auth";
 
-export const AccessCodeForm = () => {
+interface AccessCodeFormProps {
+  onSuccess?: () => void;
+}
+
+export const AccessCodeForm = ({ onSuccess }: AccessCodeFormProps) => {
   const [accessCode, setAccessCode] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
 
   useEffect(() => {
-    // If already authenticated, redirect to chat
     if (isAuthenticated()) {
       console.log("Already authenticated, redirecting to chat");
-      router.replace("/chat");
+      onSuccess?.() || router.replace("/chat");
     }
-  }, [router]);
+  }, [router, onSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +38,7 @@ export const AccessCodeForm = () => {
 
       if (data.success) {
         console.log("Access code matches, redirecting to chat");
-        router.replace("/chat");
+        onSuccess?.() || router.replace("/chat");
       } else {
         console.log("Access code mismatch");
         setError("Invalid access code. Please try again.");

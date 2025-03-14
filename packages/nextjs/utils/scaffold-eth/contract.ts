@@ -12,8 +12,6 @@ import {
   ExtractAbiFunction,
 } from "abitype";
 import type { ExtractAbiFunctionNames } from "abitype";
-import type { Simplify } from "type-fest";
-import type { MergeDeepRecord } from "type-fest/source/merge-deep";
 import {
   Address,
   Block,
@@ -30,6 +28,11 @@ import { WriteContractVariables } from "wagmi/query";
 import deployedContractsData from "~~/contracts/deployedContracts";
 import externalContractsData from "~~/contracts/externalContracts";
 import scaffoldConfig from "~~/scaffold.config";
+
+// Define Simplify type inline since it's not available in type-fest
+type Simplify<T> = { [K in keyof T]: T[K] };
+// Define a simpler version of MergeDeepRecord for our needs
+type MergeDeepRecord<L, E, _Options = Record<string, never>> = L & E;
 
 type AddExternalFlag<T> = {
   [ChainId in keyof T]: {
@@ -80,7 +83,7 @@ export const contracts = contractsData as GenericContractsDeclaration | null;
 
 type ConfiguredChainId = (typeof scaffoldConfig)["targetNetworks"][0]["id"];
 
-type IsContractDeclarationMissing<TYes, TNo> = typeof contractsData extends { [key in ConfiguredChainId]: any }
+type IsContractDeclarationMissing<TYes, TNo> = typeof contractsData extends { [_key in ConfiguredChainId]: any }
   ? TNo
   : TYes;
 
@@ -150,7 +153,9 @@ export type FunctionNamesWithInputs<
 
 type Expand<T> = T extends object ? (T extends infer O ? { [K in keyof O]: O[K] } : never) : T;
 
-type UnionToIntersection<U> = Expand<(U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never>;
+type UnionToIntersection<U> = Expand<
+  (U extends any ? (_k: U) => void : never) extends (_k: infer I) => void ? I : never
+>;
 
 type OptionalTuple<T> = T extends readonly [infer H, ...infer R] ? readonly [H | undefined, ...OptionalTuple<R>] : T;
 
@@ -236,7 +241,7 @@ export type UseScaffoldEventConfig<
 } & IsContractDeclarationMissing<
   Omit<UseWatchContractEventParameters, "onLogs" | "address" | "abi" | "eventName"> & {
     onLogs: (
-      logs: Simplify<
+      _logs: Simplify<
         Omit<Log<bigint, number, any>, "args" | "eventName"> & {
           args: Record<string, unknown>;
           eventName: string;
@@ -246,7 +251,7 @@ export type UseScaffoldEventConfig<
   },
   Omit<UseWatchContractEventParameters<ContractAbi<TContractName>>, "onLogs" | "address" | "abi" | "eventName"> & {
     onLogs: (
-      logs: Simplify<
+      _logs: Simplify<
         Omit<Log<bigint, number, false, TEvent, false, [TEvent], TEventName>, "args"> & {
           args: AbiParametersToPrimitiveTypes<TEvent["inputs"]> &
             GetEventArgs<
