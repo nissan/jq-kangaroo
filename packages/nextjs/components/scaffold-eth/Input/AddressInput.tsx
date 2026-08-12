@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { blo } from "blo";
+import makeBlockie from "ethereum-blockies-base64";
 import { useDebounceValue } from "usehooks-ts";
 import { Address, isAddress } from "viem";
 import { normalize } from "viem/ens";
@@ -113,7 +113,7 @@ export const AddressInput = ({ value, name, placeholder, onChange, disabled }: C
       suffix={
         // Don't want to use nextJS Image here (and adding remote patterns for the URL)
         // eslint-disable-next-line @next/next/no-img-element
-        value && <img alt="" className="!rounded-full" src={blo(value as `0x${string}`)} width="35" height="35" />
+        value && <img alt="" className="!rounded-full" src={makeBlockie(value as string)} width="35" height="35" />
       }
     />
   );
